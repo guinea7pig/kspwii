@@ -49,7 +49,7 @@ u8 Player::GetSign()
  * Get the player score.
  * @return Player score.
  */
-unsigned int Player::GetScore()
+u16 Player::GetScore()
 {
     return Score;
 }

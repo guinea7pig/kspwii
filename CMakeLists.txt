@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.25)
 project(Wii-Tac-Toe)
 
 find_library(AESND aesnd
@@ -44,7 +44,7 @@ file(GLOB_RECURSE BIN_FILES
 
 add_executable(Wii-Tac-Toe)
 
-target_compile_features(Wii-Tac-Toe PRIVATE cxx_std_23)
+target_compile_features(Wii-Tac-Toe PRIVATE cxx_std_26)
 
 target_compile_options(Wii-Tac-Toe PRIVATE
   -Werror

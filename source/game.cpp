@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <charconv>
+#include <limits>
 #include <wiiuse/wpad.h>
 #include <ogc/conf.h>
 #include <ogc/lwp_watchdog.h>
@@ -35,6 +37,11 @@ static constexpr Point Table[3][3] = {
     {Point(180, 28), Point(180, 131), Point(180, 233)},
     {Point(322, 28), Point(322, 131), Point(322, 233)},
     {Point(464, 28), Point(464, 131), Point(464, 233)}};
+
+/**
+ * Maximum digits + null terminator.
+ */
+static constexpr size_t MaxScoreLength = std::numeric_limits<u16>::digits10 + 2;
 
 /**
  * Constructor for the Game class.
@@ -275,22 +282,25 @@ void Game::GameScreen(bool CopyScreen)
 
         // Draw score with a shadow offset of -2, 2
         {
-            const auto ScoreText = fmt::format_int(WTTPlayer[0].GetScore());
-            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, ScoreText.c_str(), 35) / 2;
-            GRRLIB_PrintfTTF(TextLeft, 77, DefaultFont, ScoreText.c_str(), 35, 0x6BB6DEFF);
-            GRRLIB_PrintfTTF(TextLeft - 2, 75, DefaultFont, ScoreText.c_str(), 35, 0xFFFFFFFF);
+            char ScoreText[MaxScoreLength] = {};
+            std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[0].GetScore());
+            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
+            GRRLIB_PrintfTTF(TextLeft, 77, DefaultFont, &ScoreText[0], 35, 0x6BB6DEFF);
+            GRRLIB_PrintfTTF(TextLeft - 2, 75, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
         {
-            const auto ScoreText = fmt::format_int(WTTPlayer[1].GetScore());
-            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, ScoreText.c_str(), 35) / 2;
-            GRRLIB_PrintfTTF(TextLeft, 177, DefaultFont, ScoreText.c_str(), 35, 0xE6313AFF);
-            GRRLIB_PrintfTTF(TextLeft - 2, 175, DefaultFont, ScoreText.c_str(), 35, 0xFFFFFFFF);
+            char ScoreText[MaxScoreLength] = {};
+            std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[1].GetScore());
+            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
+            GRRLIB_PrintfTTF(TextLeft, 177, DefaultFont, &ScoreText[0], 35, 0xE6313AFF);
+            GRRLIB_PrintfTTF(TextLeft - 2, 175, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
         {
-            const auto ScoreText = fmt::format_int(TieGame);
-            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, ScoreText.c_str(), 35) / 2;
-            GRRLIB_PrintfTTF(TextLeft, 282, DefaultFont, ScoreText.c_str(), 35, 0x109642FF);
-            GRRLIB_PrintfTTF(TextLeft - 2, 280, DefaultFont, ScoreText.c_str(), 35, 0xFFFFFFFF);
+            char ScoreText[MaxScoreLength] = {};
+            std::to_chars(ScoreText, ScoreText + MaxScoreLength, TieGame);
+            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
+            GRRLIB_PrintfTTF(TextLeft, 282, DefaultFont, &ScoreText[0], 35, 0x109642FF);
+            GRRLIB_PrintfTTF(TextLeft - 2, 280, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
 
         // Draw text at the bottom with a shadow offset of 1, 1

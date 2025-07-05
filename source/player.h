@@ -33,13 +33,13 @@ public:
     [[nodiscard]] std::string GetName();
     void SetSign(u8 ASign);
     [[nodiscard]] u8 GetSign();
-    [[nodiscard]] unsigned int GetScore();
+    [[nodiscard]] u16 GetScore();
     void IncScore();
     void ResetScore();
     void SetType(playerType AType);
     [[nodiscard]] playerType GetType();
 private:
-    unsigned int Score;
+    u16 Score;
     std::string Name;
     u8 Sign;
     playerType Type;
