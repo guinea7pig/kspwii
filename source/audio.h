@@ -26,9 +26,9 @@ public:
     void PlaySoundScreenChange(u16 Volume);
     void PlaySoundButton(u16 Volume);
 private:
-    bool Paused;
-    Voice *ScreenVoice;
-    Voice *ButtonVoice;
+    bool Paused{false};
+    Voice *ScreenVoice{nullptr};
+    Voice *ButtonVoice{nullptr};
 };
 //---------------------------------------------------------------------------
 #endif
