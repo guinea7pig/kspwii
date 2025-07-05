@@ -17,9 +17,6 @@ pkg_check_modules(FREETYPE REQUIRED freetype2)
 pkg_check_modules(MXML REQUIRED mxml)
 
 include(FetchContent)
-FetchContent_Declare(fmt
-  URL https://github.com/fmtlib/fmt/archive/refs/tags/11.2.0.tar.gz
-)
 FetchContent_Declare(grrlib
   GIT_REPOSITORY https://github.com/GRRLIB/GRRLIB.git
   GIT_TAG        c3f2acfee7a4a93e35ade02408daa1508c9309f5
@@ -27,11 +24,10 @@ FetchContent_Declare(grrlib
 FetchContent_Declare(grrmod
   URL https://codeload.github.com/GRRLIB/GRRMOD/tar.gz/670f84601a5086c4d3eeb03bd3041e3c0a7f0ace
 )
-set(FMT_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRLIB_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRMOD_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRMOD_USE_MP3 OFF CACHE BOOL "Don't use MP3" FORCE)
-FetchContent_MakeAvailable(fmt grrlib grrmod)
+FetchContent_MakeAvailable(grrlib grrmod)
 
 file(GLOB_RECURSE SRC_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp"
@@ -70,7 +66,6 @@ dkp_add_embedded_binary_library(data
 
 target_link_libraries(Wii-Tac-Toe PRIVATE
   data
-  fmt::fmt
   grrlib
   grrmod
   ${PNG_LIBRARIES}
