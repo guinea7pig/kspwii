@@ -281,23 +281,24 @@ void Game::GameScreen(bool CopyScreen)
         GameText->Draw(0, 0); // Background image with some text
 
         // Draw score with a shadow offset of -2, 2
+        char ScoreText[MaxScoreLength];
+        if(auto [ptr, ec] = std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[0].GetScore()); ec == std::errc{})
         {
-            char ScoreText[MaxScoreLength] = {};
-            std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[0].GetScore());
+            *ptr = '\0';
             const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
             GRRLIB_PrintfTTF(TextLeft, 77, DefaultFont, &ScoreText[0], 35, 0x6BB6DEFF);
             GRRLIB_PrintfTTF(TextLeft - 2, 75, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
+        if(auto [ptr, ec] = std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[1].GetScore()); ec == std::errc{})
         {
-            char ScoreText[MaxScoreLength] = {};
-            std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[1].GetScore());
+            *ptr = '\0';
             const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
             GRRLIB_PrintfTTF(TextLeft, 177, DefaultFont, &ScoreText[0], 35, 0xE6313AFF);
             GRRLIB_PrintfTTF(TextLeft - 2, 175, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
+        if(auto [ptr, ec] = std::to_chars(ScoreText, ScoreText + MaxScoreLength, TieGame); ec == std::errc{})
         {
-            char ScoreText[MaxScoreLength] = {};
-            std::to_chars(ScoreText, ScoreText + MaxScoreLength, TieGame);
+            *ptr = '\0';
             const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
             GRRLIB_PrintfTTF(TextLeft, 282, DefaultFont, &ScoreText[0], 35, 0x109642FF);
             GRRLIB_PrintfTTF(TextLeft - 2, 280, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
