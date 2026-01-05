@@ -7,7 +7,7 @@
  */
 Voice::Voice()
 {
-    _Voice = AESND_AllocateVoice(nullptr);
+    _Voice = AESND_AllocateVoiceWithArg(nullptr, nullptr);
 }
 
 /**

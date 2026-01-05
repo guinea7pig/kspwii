@@ -25,7 +25,10 @@ enum class playerType : u8 {
 class Player
 {
 public:
-    Player();
+    /**
+     * Constructor for the Player class.
+     */ 
+    Player() = default;
     Player(Player const&) = delete;
     ~Player() = default;
     Player& operator=(Player const&) = delete;
@@ -33,16 +36,16 @@ public:
     [[nodiscard]] std::string GetName();
     void SetSign(u8 ASign);
     [[nodiscard]] u8 GetSign();
-    [[nodiscard]] unsigned int GetScore();
+    [[nodiscard]] u16 GetScore();
     void IncScore();
     void ResetScore();
     void SetType(playerType AType);
     [[nodiscard]] playerType GetType();
 private:
-    unsigned int Score;
-    std::string Name;
-    u8 Sign;
-    playerType Type;
+    u16 Score{0};
+    std::string Name{};
+    u8 Sign{0};
+    playerType Type{playerType::Human};
 };
 //---------------------------------------------------------------------------
 #endif

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.25)
 project(Wii-Tac-Toe)
 
 find_library(AESND aesnd
@@ -17,21 +17,17 @@ pkg_check_modules(FREETYPE REQUIRED freetype2)
 pkg_check_modules(MXML REQUIRED mxml)
 
 include(FetchContent)
-FetchContent_Declare(fmt
-  URL https://github.com/fmtlib/fmt/archive/refs/tags/11.2.0.tar.gz
-)
 FetchContent_Declare(grrlib
   GIT_REPOSITORY https://github.com/GRRLIB/GRRLIB.git
-  GIT_TAG        c3f2acfee7a4a93e35ade02408daa1508c9309f5
+  GIT_TAG        8feae891610ccd08ea2d2cb5d987fc74c47ad57c
 )
 FetchContent_Declare(grrmod
-  URL https://codeload.github.com/GRRLIB/GRRMOD/tar.gz/670f84601a5086c4d3eeb03bd3041e3c0a7f0ace
+  URL https://codeload.github.com/GRRLIB/GRRMOD/tar.gz/eaebb7a92dcacd4e74ec600b2d0056a5fac408c7
 )
-set(FMT_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRLIB_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRMOD_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRMOD_USE_MP3 OFF CACHE BOOL "Don't use MP3" FORCE)
-FetchContent_MakeAvailable(fmt grrlib grrmod)
+FetchContent_MakeAvailable(grrlib grrmod)
 
 file(GLOB_RECURSE SRC_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp"
@@ -44,15 +40,17 @@ file(GLOB_RECURSE BIN_FILES
 
 add_executable(Wii-Tac-Toe)
 
-target_compile_features(Wii-Tac-Toe PRIVATE cxx_std_23)
+target_compile_features(Wii-Tac-Toe PRIVATE cxx_std_26)
 
 target_compile_options(Wii-Tac-Toe PRIVATE
   -Werror
   -Wall
+  -Wextra
   -Wunused
   -Wmisleading-indentation
   -Wduplicated-cond
   -Wduplicated-branches
+  -Wsuggest-override
 )
 
 target_sources(Wii-Tac-Toe PRIVATE
@@ -70,7 +68,6 @@ dkp_add_embedded_binary_library(data
 
 target_link_libraries(Wii-Tac-Toe PRIVATE
   data
-  fmt::fmt
   grrlib
   grrmod
   ${PNG_LIBRARIES}

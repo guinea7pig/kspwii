@@ -16,14 +16,14 @@
 class Point
 {
 private:
-    u16 x;
-    u16 y;
+    u16 x{0};
+    u16 y{0};
 public:
     /**
      * Constructor for the Point class.
      * Initializes a point at the origin (0, 0) of the coordinate space.
      */
-    constexpr Point() : x(0), y(0)
+    constexpr Point()
     {
     }
     /**

@@ -1,17 +1,18 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
+#include <charconv>
+#include <limits>
+#include <format>
 #include <wiiuse/wpad.h>
 #include <ogc/conf.h>
 #include <ogc/lwp_watchdog.h>
 #include "grrlib.h"
 #include "grrlib_class.h"
-#include "fmt/format.h"
-#include "fmt/chrono.h"
 #include "tools.h"
 #include "grid.h"
 #include "audio.h"
-#include "symbol.h"
 #include "button.h"
 #include "cursor.h"
 #include "player.h"
@@ -38,18 +39,18 @@ static constexpr Point Table[3][3] = {
     {Point(464, 28), Point(464, 131), Point(464, 233)}};
 
 /**
+ * Maximum digits + null terminator.
+ */
+static constexpr size_t MaxScoreLength = std::numeric_limits<u16>::digits10 + 2;
+
+/**
  * Constructor for the Game class.
  * @param[in] GameScreenWidth Screen width.
  * @param[in] GameScreenHeight Screen height.
  */
 Game::Game(u16 GameScreenWidth, u16 GameScreenHeight) :
-    FPS(0),
-    ShowFPS(false),
     ScreenWidth(GameScreenWidth),
-    ScreenHeight(GameScreenHeight),
-    GameMode(gameMode::VsHuman1),
-    SymbolAlpha(5),
-    AlphaDirection(false)
+    ScreenHeight(GameScreenHeight)
 {
     std::srand(std::time(nullptr));
 
@@ -80,31 +81,31 @@ Game::Game(u16 GameScreenWidth, u16 GameScreenHeight) :
 
     ExitButton[1] = new Button(buttonType::HomeMenu);
     ExitButton[1]->SetFont(DefaultFont);
-    ExitButton[1]->SetLeft((ScreenWidth / 2) + 20);
+    ExitButton[1]->SetLeft((ScreenWidth / 2.0f) + 20.0f);
     ExitButton[1]->SetTop(165);
     ExitButton[1]->SetCaption(Lang->String("Reset"));
 
     ExitButton[2] = new Button(buttonType::HomeMenu);
     ExitButton[2]->SetFont(DefaultFont);
-    ExitButton[2]->SetLeft((ScreenWidth / 2) - ExitButton[1]->GetWidth() - 20);
+    ExitButton[2]->SetLeft((ScreenWidth / 2.0f) - ExitButton[1]->GetWidth() - 20.0f);
     ExitButton[2]->SetTop(165);
     ExitButton[2]->SetCaption(Lang->String("Return to Loader"));
 
-    MenuButton[0] = new Button();
+    MenuButton[0] = new Button(buttonType::StdMenu);
     MenuButton[0]->SetFont(DefaultFont);
-    MenuButton[0]->SetLeft((ScreenWidth / 2) - (MenuButton[0]->GetWidth() / 2));
+    MenuButton[0]->SetLeft((ScreenWidth / 2.0f) - (MenuButton[0]->GetWidth() / 2.0f));
     MenuButton[0]->SetTop(92);
     MenuButton[0]->SetCaption(Lang->String("2 Players (1 Wiimote)"));
 
-    MenuButton[1] = new Button();
+    MenuButton[1] = new Button(buttonType::StdMenu);
     MenuButton[1]->SetFont(DefaultFont);
-    MenuButton[1]->SetLeft((ScreenWidth / 2) - (MenuButton[1]->GetWidth() / 2));
+    MenuButton[1]->SetLeft((ScreenWidth / 2.0f) - (MenuButton[1]->GetWidth() / 2.0f));
     MenuButton[1]->SetTop(292);
     MenuButton[1]->SetCaption(Lang->String("1 Player (Vs AI)"));
 
-    MenuButton[2] = new Button();
+    MenuButton[2] = new Button(buttonType::StdMenu);
     MenuButton[2]->SetFont(DefaultFont);
-    MenuButton[2]->SetLeft((ScreenWidth / 2) - (MenuButton[2]->GetWidth() / 2));
+    MenuButton[2]->SetLeft((ScreenWidth / 2.0f) - (MenuButton[2]->GetWidth() / 2.0f));
     MenuButton[2]->SetTop(192);
     MenuButton[2]->SetCaption(Lang->String("2 Players (2 Wiimote)"));
 
@@ -132,10 +133,10 @@ Game::Game(u16 GameScreenWidth, u16 GameScreenHeight) :
     // Build Start Screen background
     SplashImg->Draw(0, 0);
     GRRLIB_PrintfTTF(50, 310, DefaultFont,
-        fmt::format(fmt::runtime(Lang->String("Programmer: {}")), "Crayon").c_str(),
+        std::format(std::runtime_format(Lang->String("Programmer: {}")), "Crayon").c_str(),
         11, 0xFFFFFFFF);
     GRRLIB_PrintfTTF(50, 330, DefaultFont,
-        fmt::format(fmt::runtime(Lang->String("Graphics: {}")), "Mr_Nick666").c_str(),
+        std::format(std::runtime_format(Lang->String("Graphics: {}")), "Mr_Nick666").c_str(),
         11, 0xFFFFFFFF);
     text = Lang->String("Press The A Button");
     GRRLIB_PrintfTTF((ScreenWidth / 2) - (GRRLIB_WidthTTF(DefaultFont, text.c_str(), 20) / 2),
@@ -145,7 +146,7 @@ Game::Game(u16 GameScreenWidth, u16 GameScreenHeight) :
     // Set handle for arm rotation
     SplashArmImg->SetHandle(8, 70);
 
-    GameAudio = new Audio();
+    GameAudio = std::make_unique<Audio>();
 
     RUMBLE_Init();
     NewGame();
@@ -170,8 +171,6 @@ Game::~Game()
     {
         delete MenuButton[i];
     }
-
-    delete GameAudio;
 }
 
 /**
@@ -226,7 +225,7 @@ void Game::Paint()
     if(ShowFPS == true)
     {
         CalculateFrameRate();
-        const auto strFPS = fmt::format("FPS: {}", FPS);
+        const auto strFPS = std::format("FPS: {}", FPS);
         GRRLIB_PrintfTTF(14, 444, DefaultFont, strFPS.c_str(), 17, 0xFFFFFFFF);
         GRRLIB_PrintfTTF(16, 446, DefaultFont, strFPS.c_str(), 17, 0x808080FF);
         GRRLIB_PrintfTTF(15, 445, DefaultFont, strFPS.c_str(), 17, 0x000000FF);
@@ -275,23 +274,27 @@ void Game::GameScreen(bool CopyScreen)
         GameText->Draw(0, 0); // Background image with some text
 
         // Draw score with a shadow offset of -2, 2
+        char ScoreText[MaxScoreLength];
+        if(auto [ptr, ec] = std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[0].GetScore()); ec == std::errc{})
         {
-            const auto ScoreText = fmt::format_int(WTTPlayer[0].GetScore());
-            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, ScoreText.c_str(), 35) / 2;
-            GRRLIB_PrintfTTF(TextLeft, 77, DefaultFont, ScoreText.c_str(), 35, 0x6BB6DEFF);
-            GRRLIB_PrintfTTF(TextLeft - 2, 75, DefaultFont, ScoreText.c_str(), 35, 0xFFFFFFFF);
+            *ptr = '\0';
+            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
+            GRRLIB_PrintfTTF(TextLeft, 77, DefaultFont, &ScoreText[0], 35, 0x6BB6DEFF);
+            GRRLIB_PrintfTTF(TextLeft - 2, 75, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
+        if(auto [ptr, ec] = std::to_chars(ScoreText, ScoreText + MaxScoreLength, WTTPlayer[1].GetScore()); ec == std::errc{})
         {
-            const auto ScoreText = fmt::format_int(WTTPlayer[1].GetScore());
-            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, ScoreText.c_str(), 35) / 2;
-            GRRLIB_PrintfTTF(TextLeft, 177, DefaultFont, ScoreText.c_str(), 35, 0xE6313AFF);
-            GRRLIB_PrintfTTF(TextLeft - 2, 175, DefaultFont, ScoreText.c_str(), 35, 0xFFFFFFFF);
+            *ptr = '\0';
+            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
+            GRRLIB_PrintfTTF(TextLeft, 177, DefaultFont, &ScoreText[0], 35, 0xE6313AFF);
+            GRRLIB_PrintfTTF(TextLeft - 2, 175, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
+        if(auto [ptr, ec] = std::to_chars(ScoreText, ScoreText + MaxScoreLength, TieGame); ec == std::errc{})
         {
-            const auto ScoreText = fmt::format_int(TieGame);
-            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, ScoreText.c_str(), 35) / 2;
-            GRRLIB_PrintfTTF(TextLeft, 282, DefaultFont, ScoreText.c_str(), 35, 0x109642FF);
-            GRRLIB_PrintfTTF(TextLeft - 2, 280, DefaultFont, ScoreText.c_str(), 35, 0xFFFFFFFF);
+            *ptr = '\0';
+            const auto TextLeft = 104 - GRRLIB_WidthTTF(DefaultFont, &ScoreText[0], 35) / 2;
+            GRRLIB_PrintfTTF(TextLeft, 282, DefaultFont, &ScoreText[0], 35, 0x109642FF);
+            GRRLIB_PrintfTTF(TextLeft - 2, 280, DefaultFont, &ScoreText[0], 35, 0xFFFFFFFF);
         }
 
         // Draw text at the bottom with a shadow offset of 1, 1
@@ -475,7 +478,7 @@ void Game::MenuScreen(bool CopyScreen)
         Rectangle(0, 385, ScreenWidth, 95, 0x000000FF, 1);
 
         GRRLIB_PrintfTTF(500, 40, DefaultFont,
-            fmt::format(fmt::runtime(Lang->String("Ver. {}")), "1.1.0").c_str(),
+            std::format(std::runtime_format(Lang->String("Ver. {}")), "1.1.0").c_str(),
             12, 0xFFFFFFFF);
 
         if(CopyScreen == true)
@@ -733,8 +736,8 @@ bool Game::ControllerManager()
         WPAD_Rumble(WPAD_CHAN_ALL, 1); // Rumble on
         WIILIGHT_TurnOn();
 
-        const std::time_t now = std::time(nullptr);
-        const auto path = fmt::format("sd:/Screenshot {:%F %H%M%S}.png", *std::localtime(&now));
+        const auto now = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now());
+        const auto path = std::format("sd:/Screenshot {:%F %H%M%S}.png", now);
 
         if(ScreenShot(path) == true)
         {
@@ -765,7 +768,7 @@ void Game::Clear()
     GameGrid->Clear();
     CurrentPlayer = PlayerToStart;
     PlayerToStart = !PlayerToStart; // Next other player will start
-    text = fmt::format(fmt::runtime(Lang->GetTurnOverMessage()), WTTPlayer[CurrentPlayer].GetName());
+    text = std::format(std::runtime_format(Lang->GetTurnOverMessage()), WTTPlayer[CurrentPlayer].GetName());
     RoundFinished = false;
     Copied = false;
     ChangeCursor();
@@ -781,7 +784,7 @@ void Game::TurnIsOver()
     {   // A winner is declare
         GameWinner = (GameWinner == WTTPlayer[0].GetSign()) ? 0 : 1;
         WTTPlayer[GameWinner].IncScore();
-        text = fmt::format(fmt::runtime(Lang->GetWinningMessage()),
+        text = std::format(std::runtime_format(Lang->GetWinningMessage()),
             WTTPlayer[GameWinner].GetName(), WTTPlayer[!GameWinner].GetName());
         RoundFinished = true;
         SymbolAlpha = 5;
@@ -796,7 +799,7 @@ void Game::TurnIsOver()
     else
     {
         CurrentPlayer = !CurrentPlayer; // Change player's turn
-        text = fmt::format(fmt::runtime(Lang->GetTurnOverMessage()), WTTPlayer[CurrentPlayer].GetName());
+        text = std::format(std::runtime_format(Lang->GetTurnOverMessage()), WTTPlayer[CurrentPlayer].GetName());
     }
 
     Copied = false;
