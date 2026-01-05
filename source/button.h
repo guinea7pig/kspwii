@@ -28,7 +28,7 @@ enum class buttonType : u8 {
 class Button : public Object
 {
 public:
-    Button() = default;
+    Button() = delete;
     Button(buttonType NewType);
     Button(Button const&) = delete;
     ~Button() = default;

@@ -70,28 +70,28 @@ private:
     void CalculateFrameRate();
 
     std::array<Cursor, 4> Hand;
-    s8 HandX;
-    s8 HandY;
+    s8 HandX{0};
+    s8 HandY{0};
 
-    bool CurrentPlayer;
-    bool PlayerToStart;
+    bool CurrentPlayer{false};
+    bool PlayerToStart{false};
     std::array<Player, 2> WTTPlayer;
-    gameScreen CurrentScreen;
-    gameScreen LastScreen;
-    s8 FocusedButton;
-    std::string text;
+    gameScreen CurrentScreen{};
+    gameScreen LastScreen{};
+    s8 FocusedButton{-1};
+    std::string text{};
 
-    u16 TieGame;
-    bool RoundFinished;
-    u8 FPS;
-    bool ShowFPS;
+    u16 TieGame{0};
+    bool RoundFinished{false};
+    u8 FPS{0};
+    bool ShowFPS{false};
 
     std::array<Button *, 3> ExitButton;
     std::array<Button *, 3> MenuButton;
-    Grid *GameGrid;
-    Language *Lang;
+    Grid *GameGrid{nullptr};
+    Language *Lang{nullptr};
     std::array<std::array<Symbol, 3>, 3> GridSign;
-    Audio *GameAudio;
+    std::unique_ptr<Audio> GameAudio;
 
     std::unique_ptr<Texture> GameImg; /**< Background texture for the game. */
     std::unique_ptr<Texture> GameHoverImg; /**< Hover texture for the game buttons. */
@@ -101,18 +101,18 @@ private:
     std::unique_ptr<Texture> CopiedImg; /**< Texture to store a temporary copy of the screen. */
     std::unique_ptr<Texture> GameText; /**< Game text that does not changed including background. */
 
-    bool Copied;
+    bool Copied{false};
 
-    u16 ScreenWidth;
-    u16 ScreenHeight;
+    u16 ScreenWidth{0};
+    u16 ScreenHeight{0};
 
-    u8 AIThinkLoop;
-    gameMode GameMode;
+    u8 AIThinkLoop{0};
+    gameMode GameMode{gameMode::VsHuman1};
 
-    u8 SymbolAlpha;
-    bool AlphaDirection;
+    u8 SymbolAlpha{5};
+    bool AlphaDirection{false};
 
-    GRRLIB_Font *DefaultFont;
+    GRRLIB_Font *DefaultFont{nullptr};
 };
 //---------------------------------------------------------------------------
 #endif

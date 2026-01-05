@@ -52,8 +52,6 @@ protected:
     float Angle{0.0f};      /**< The angle in degree of the object. */
     bool Visible{true};     /**< Control the visibility of the object. If Visible is true, the object appears. If Visible is false, the object is not visible. */
     u32 Color{0xFFFFFFFF};  /**< Color of the object (RGBA). */
-    //char *Name;
-    //void *Parent;
 };
 //---------------------------------------------------------------------------
 #endif

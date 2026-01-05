@@ -29,8 +29,8 @@ Audio::Audio()
     GRRMOD_Init(true);
     GRRMOD_SetMOD(tic_tac_mod, sizeof(tic_tac_mod));
 
-    ScreenVoice = new Voice();
-    ButtonVoice = new Voice();
+    ScreenVoice = std::make_unique<Voice>();
+    ButtonVoice = std::make_unique<Voice>();
 }
 
 /**
@@ -41,9 +41,6 @@ Audio::~Audio()
     GRRMOD_Unload();
     GRRMOD_End();
     AESND_Pause(true);
-
-    delete ScreenVoice;
-    delete ButtonVoice;
 }
 
 /**

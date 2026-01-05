@@ -19,10 +19,10 @@ pkg_check_modules(MXML REQUIRED mxml)
 include(FetchContent)
 FetchContent_Declare(grrlib
   GIT_REPOSITORY https://github.com/GRRLIB/GRRLIB.git
-  GIT_TAG        c3f2acfee7a4a93e35ade02408daa1508c9309f5
+  GIT_TAG        8feae891610ccd08ea2d2cb5d987fc74c47ad57c
 )
 FetchContent_Declare(grrmod
-  URL https://codeload.github.com/GRRLIB/GRRMOD/tar.gz/670f84601a5086c4d3eeb03bd3041e3c0a7f0ace
+  URL https://codeload.github.com/GRRLIB/GRRMOD/tar.gz/eaebb7a92dcacd4e74ec600b2d0056a5fac408c7
 )
 set(GRRLIB_INSTALL OFF CACHE BOOL "Don't install" FORCE)
 set(GRRMOD_INSTALL OFF CACHE BOOL "Don't install" FORCE)
@@ -45,10 +45,12 @@ target_compile_features(Wii-Tac-Toe PRIVATE cxx_std_26)
 target_compile_options(Wii-Tac-Toe PRIVATE
   -Werror
   -Wall
+  -Wextra
   -Wunused
   -Wmisleading-indentation
   -Wduplicated-cond
   -Wduplicated-branches
+  -Wsuggest-override
 )
 
 target_sources(Wii-Tac-Toe PRIVATE

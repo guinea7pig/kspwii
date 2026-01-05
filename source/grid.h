@@ -33,7 +33,7 @@ public:
     bool WinningBoard[3][3]; /**< A board filled with the winning position. */
 private:
     u8 Board[3][3];
-    u8 Winner;
+    u8 Winner{' '};
     std::mt19937 Generator;
     std::uniform_int_distribution<u8> Distribution;
 

@@ -31,7 +31,9 @@ public:
     {
     }
 
+    Sound() = delete;
     Sound(Sound const&) = delete;
+    ~Sound() = default;
     Sound& operator=(Sound const&) = delete;
 
     /**
