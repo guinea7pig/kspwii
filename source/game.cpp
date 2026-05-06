@@ -26,7 +26,7 @@
 #include "backg_png.h"
 #include "backg_hover_png.h"
 #include "hover_png.h"
-#include "ksplogo_png.h"
+//#include "ksplogo_png.h"
 
 // Font
 #include "../fonts/Swis721_Ex_BT.h"
